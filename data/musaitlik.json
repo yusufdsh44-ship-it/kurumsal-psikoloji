@@ -1,0 +1,47 @@
+[
+  {
+    "id": "1",
+    "gun": 1,
+    "baslangic": "09:00",
+    "bitis": "17:00",
+    "slotDk": 30,
+    "aktif": true,
+    "kapaliSlotlar": []
+  },
+  {
+    "id": "2",
+    "gun": 2,
+    "baslangic": "09:00",
+    "bitis": "17:00",
+    "slotDk": 30,
+    "aktif": true,
+    "kapaliSlotlar": []
+  },
+  {
+    "id": "3",
+    "gun": 3,
+    "baslangic": "09:00",
+    "bitis": "17:00",
+    "slotDk": 30,
+    "aktif": true,
+    "kapaliSlotlar": []
+  },
+  {
+    "id": "4",
+    "gun": 4,
+    "baslangic": "09:00",
+    "bitis": "17:00",
+    "slotDk": 30,
+    "aktif": true,
+    "kapaliSlotlar": []
+  },
+  {
+    "id": "5",
+    "gun": 5,
+    "baslangic": "09:00",
+    "bitis": "17:00",
+    "slotDk": 30,
+    "aktif": true,
+    "kapaliSlotlar": []
+  }
+]
