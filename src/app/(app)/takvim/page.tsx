@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import {
   startOfMonth, endOfMonth, eachDayOfInterval, format, addMonths, subMonths,
   isSameDay, isSameMonth, startOfWeek, endOfWeek, isToday,
@@ -228,7 +228,10 @@ export default function TakvimPage() {
                               <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-medium shrink-0">Yeni</span>
                             )}
                           </div>
-                          <div className="text-xs text-muted-foreground truncate">{t.mudurluk} · {t.gorusmeTuru}</div>
+                          <div className="text-xs text-muted-foreground truncate">
+                            {t.mudurluk} · {t.gorusmeTuru}
+                            {t.referansKodu && <span className="ml-1.5 font-mono text-primary/70">{t.referansKodu}</span>}
+                          </div>
                           <div className="flex items-center gap-2 mt-0.5">
                             <span className="text-xs font-semibold text-blue-700">
                               {new Date(t.istenenTarih + "T12:00:00").toLocaleDateString("tr-TR", { day: "numeric", month: "short", weekday: "short" })} · {t.istenenSaat}
@@ -446,10 +449,10 @@ export default function TakvimPage() {
                   size="sm"
                   className={`h-7 text-xs transition-all ${musaitlikDirty ? "bg-green-600 hover:bg-green-700 text-white shadow-md" : ""}`}
                   variant={musaitlikDirty ? "default" : "outline"}
-                  disabled={!musaitlikDirty || pushingMusaitlik}
+                  disabled={pushingMusaitlik}
                   onClick={handleSaveMusaitlik}
                 >
-                  {pushingMusaitlik ? "Kaydediliyor..." : musaitlikDirty ? "Kaydet ve Yayınla" : "Güncel"}
+                  {pushingMusaitlik ? "Kaydediliyor..." : musaitlikDirty ? "Kaydet ve Yayınla" : "Kaydet ve Yayınla"}
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground">Değişiklik yaptıktan sonra &quot;Kaydet ve Yayınla&quot; ile portala yansıtın.</p>
@@ -481,6 +484,7 @@ export default function TakvimPage() {
                         onChange={e => handleMusaitlikChange(m.id, { slotDk: Number(e.target.value) })}
                         disabled={!m.aktif}
                         className="rounded border border-border bg-background px-1.5 py-0.5 text-xs ml-auto">
+                        <option value={20}>20dk</option>
                         <option value={30}>30dk</option>
                         <option value={45}>45dk</option>
                         <option value={50}>50dk</option>
@@ -491,82 +495,8 @@ export default function TakvimPage() {
                 })}
               </div>
 
-              {/* Visual slot grid */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-sm font-semibold">Slot Tablosu</h3>
-                  <p className="text-[10px] text-muted-foreground">Yeşil = müsait · Tıkla kapat/aç</p>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse">
-                    <thead>
-                      <tr>
-                        <th className="text-[10px] font-medium text-muted-foreground p-1 w-14 text-left">Saat</th>
-                        {(musaitlikData ?? []).map(m => {
-                          const gunAdi = ["", "Pzt", "Sal", "Çar", "Per", "Cum"][m.gun] ?? ""
-                          return <th key={m.gun} className={`text-[10px] font-medium p-1 text-center ${m.aktif ? "text-foreground" : "text-muted-foreground/40"}`}>{gunAdi}</th>
-                        })}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(() => {
-                        // Collect all unique time slots across all days
-                        const allSlots = new Set<string>()
-                        for (const m of (musaitlikData ?? [])) {
-                          if (!m.aktif) continue
-                          const [sh, sm] = m.baslangic.split(":").map(Number)
-                          const [eh, em] = m.bitis.split(":").map(Number)
-                          let t = sh * 60 + sm
-                          const end = eh * 60 + em
-                          while (t + m.slotDk <= end) {
-                            const h = Math.floor(t / 60)
-                            const min = t % 60
-                            allSlots.add(`${String(h).padStart(2, "0")}:${String(min).padStart(2, "0")}`)
-                            t += m.slotDk
-                          }
-                        }
-                        const sorted = Array.from(allSlots).sort()
-                        return sorted.map(slot => (
-                          <tr key={slot}>
-                            <td className="text-[11px] font-mono text-muted-foreground px-1 py-0.5">{slot}</td>
-                            {(musaitlikData ?? []).map(m => {
-                              if (!m.aktif) return <td key={m.gun} className="p-0.5"><div className="h-6 rounded bg-muted/30" /></td>
-                              // Check if this slot falls within this day\'s range
-                              const [sh, sm] = m.baslangic.split(":").map(Number)
-                              const [eh, em] = m.bitis.split(":").map(Number)
-                              const [slotH, slotM] = slot.split(":").map(Number)
-                              const slotMin = slotH * 60 + slotM
-                              const inRange = slotMin >= sh * 60 + sm && slotMin + m.slotDk <= eh * 60 + em
-                              if (!inRange) return <td key={m.gun} className="p-0.5"><div className="h-6 rounded bg-muted/20" /></td>
-                              const isKapali = (m.kapaliSlotlar ?? []).includes(slot)
-                              return (
-                                <td key={m.gun} className="p-0.5">
-                                  <button
-                                    onClick={() => {
-                                      const current = m.kapaliSlotlar ?? []
-                                      const updated = isKapali
-                                        ? current.filter((s: string) => s !== slot)
-                                        : [...current, slot]
-                                      handleMusaitlikChange(m.id, { kapaliSlotlar: updated })
-                                    }}
-                                    className={`w-full h-6 rounded text-[10px] font-medium transition-all ${
-                                      isKapali
-                                        ? "bg-red-50 text-red-400 border border-red-200 hover:bg-red-100"
-                                        : "bg-green-50 text-green-700 border border-green-200 hover:bg-green-100"
-                                    }`}
-                                  >
-                                    {isKapali ? "×" : "✓"}
-                                  </button>
-                                </td>
-                              )
-                            })}
-                          </tr>
-                        ))
-                      })()}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+              {/* Tarihe ozel slot tablosu */}
+              <DateSlotGrid musaitlikData={(musaitlikData ?? []) as Musaitlik[]} />
             </CardContent>
           </Card>
         </TabsContent>
@@ -588,6 +518,145 @@ export default function TakvimPage() {
         initialDate={selectedDay ?? undefined}
         onScheduled={() => setRandevuDialogOpen(false)}
       />
+    </div>
+  )
+}
+
+/* ── Tarihe Ozel Slot Grid ──────────────── */
+
+function DateSlotGrid({ musaitlikData }: { musaitlikData: Musaitlik[] }) {
+  const [kapaliMap, setKapaliMap] = useState<Record<string, string[]>>({})
+  const [loading, setLoading] = useState(false)
+
+  // Gelecek 10 is gunu
+  const days = useMemo(() => {
+    const result: { date: string; label: string; weekday: number }[] = []
+    const today = new Date()
+    for (let i = 1; result.length < 10 && i <= 30; i++) {
+      const d = new Date(today)
+      d.setDate(d.getDate() + i)
+      const dow = d.getDay()
+      if (dow >= 1 && dow <= 5) {
+        const dateStr = d.toISOString().split("T")[0]
+        const config = musaitlikData.find(m => m.gun === dow)
+        if (config?.aktif) {
+          result.push({
+            date: dateStr,
+            label: d.toLocaleDateString("tr-TR", { day: "numeric", month: "short", weekday: "short" }),
+            weekday: dow,
+          })
+        }
+      }
+    }
+    return result
+  }, [musaitlikData])
+
+  // Tum gunlerin kapali slotlarini cek
+  useEffect(() => {
+    if (days.length === 0) return
+    Promise.all(days.map(d =>
+      fetch("/api/sync-supabase", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "get-closed-slots", data: { tarih: d.date } }),
+      }).then(r => r.json()).then(res => ({ date: d.date, slots: res.slots ?? [] as string[] }))
+    )).then(results => {
+      const map: Record<string, string[]> = {}
+      for (const r of results) map[r.date] = r.slots
+      setKapaliMap(map)
+    })
+  }, [days])
+
+  // Slotlari hesapla (ilk aktif gunun ayarlarindan)
+  const allSlots = useMemo(() => {
+    const slots = new Set<string>()
+    for (const m of musaitlikData) {
+      if (!m.aktif) continue
+      const [sh, sm] = m.baslangic.split(":").map(Number)
+      const [eh, em] = m.bitis.split(":").map(Number)
+      let t = sh * 60 + sm
+      const end = eh * 60 + em
+      while (t + m.slotDk <= end) {
+        slots.add(`${String(Math.floor(t / 60)).padStart(2, "0")}:${String(t % 60).padStart(2, "0")}`)
+        t += m.slotDk
+      }
+    }
+    return Array.from(slots).sort()
+  }, [musaitlikData])
+
+  const toggleSlot = async (tarih: string, saat: string) => {
+    const kapali = kapaliMap[tarih] ?? []
+    const isKapali = kapali.includes(saat)
+    setLoading(true)
+    try {
+      await fetch("/api/sync-supabase", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: isKapali ? "open-slot" : "close-slot", data: { tarih, saat } }),
+      })
+      setKapaliMap(prev => ({
+        ...prev,
+        [tarih]: isKapali ? (prev[tarih] ?? []).filter(s => s !== saat) : [...(prev[tarih] ?? []), saat],
+      }))
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="text-sm font-semibold">Slot Tablosu</h3>
+        <p className="text-[10px] text-muted-foreground">Yeşil = müsait · Tıklayarak tarihe özel kapat/aç</p>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse">
+          <thead>
+            <tr>
+              <th className="text-[10px] font-medium text-muted-foreground p-1 w-14 text-left">Saat</th>
+              {days.map(d => (
+                <th key={d.date} className="text-[10px] font-medium text-foreground p-1 text-center">
+                  {d.label}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {allSlots.map(slot => (
+              <tr key={slot}>
+                <td className="text-[11px] font-mono text-muted-foreground px-1 py-0.5">{slot}</td>
+                {days.map(d => {
+                  const config = musaitlikData.find(m => m.gun === d.weekday)
+                  if (!config?.aktif) return <td key={d.date} className="p-0.5"><div className="h-6 rounded bg-muted/30" /></td>
+                  const [sh, sm] = config.baslangic.split(":").map(Number)
+                  const [eh, em] = config.bitis.split(":").map(Number)
+                  const [slotH, slotM] = slot.split(":").map(Number)
+                  const slotMin = slotH * 60 + slotM
+                  const inRange = slotMin >= sh * 60 + sm && slotMin + config.slotDk <= eh * 60 + em
+                  if (!inRange) return <td key={d.date} className="p-0.5"><div className="h-6 rounded bg-muted/20" /></td>
+
+                  const isKapali = (kapaliMap[d.date] ?? []).includes(slot)
+                  return (
+                    <td key={d.date} className="p-0.5">
+                      <button
+                        onClick={() => toggleSlot(d.date, slot)}
+                        disabled={loading}
+                        className={`w-full h-6 rounded text-[10px] font-medium transition-all disabled:opacity-50 ${
+                          isKapali
+                            ? "bg-red-50 text-red-400 border border-red-200 hover:bg-red-100"
+                            : "bg-green-50 text-green-700 border border-green-200 hover:bg-green-100"
+                        }`}
+                      >
+                        {isKapali ? "×" : "✓"}
+                      </button>
+                    </td>
+                  )
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }

@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useMemo } from "react"
-import { useCollection, useUpdateRecord } from "@/hooks/use-data"
+import { useState, useMemo, useCallback } from "react"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { Breadcrumb } from "@/components/layout/breadcrumb"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
@@ -21,15 +21,39 @@ const KATEGORI_RENK: Record<string, { bg: string; text: string }> = {
 }
 
 export default function MesajlarPage() {
-  const { data: mesajlar, isLoading } = useCollection("mesajlar")
-  const updateMesaj = useUpdateRecord("mesajlar")
+  const queryClient = useQueryClient()
+
+  const { data: mesajlar, isLoading } = useQuery<Mesaj[]>({
+    queryKey: ["supabase-mesajlar"],
+    queryFn: async () => {
+      const res = await fetch("/api/mesajlar")
+      if (!res.ok) throw new Error("Mesajlar yüklenemedi")
+      return res.json()
+    },
+    refetchInterval: 30_000, // 30 sn'de bir yeni mesajları kontrol et
+  })
+
+  const updateMesaj = useMutation({
+    mutationFn: async (payload: { id: string; data: Record<string, unknown> }) => {
+      const res = await fetch("/api/mesajlar", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: payload.id, ...payload.data }),
+      })
+      if (!res.ok) throw new Error("Güncelleme hatası")
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["supabase-mesajlar"] })
+    },
+  })
+
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [cevapDraft, setCevapDraft] = useState("")
   const [filter, setFilter] = useState<"all" | "unread" | "anonim" | "kimlikli">("all")
 
   const filtered = useMemo(() => {
     if (!mesajlar) return []
-    let result = [...mesajlar].sort((a, b) =>
+    const result = [...mesajlar].sort((a, b) =>
       new Date(b.olusturmaTarihi).getTime() - new Date(a.olusturmaTarihi).getTime()
     )
     switch (filter) {
@@ -43,21 +67,21 @@ export default function MesajlarPage() {
   const unreadCount = mesajlar?.filter(m => !m.okundu).length ?? 0
   const selected = mesajlar?.find(m => m.id === selectedId)
 
-  const handleSelect = (m: Mesaj) => {
+  const handleSelect = useCallback((m: Mesaj) => {
     setSelectedId(m.id)
     setCevapDraft(m.cevap ?? "")
     if (!m.okundu) {
       updateMesaj.mutate({ id: m.id, data: { okundu: true } })
     }
-  }
+  }, [updateMesaj])
 
-  const handleCevapGonder = () => {
+  const handleCevapGonder = useCallback(() => {
     if (!selectedId || !cevapDraft.trim()) return
     updateMesaj.mutate({
       id: selectedId,
-      data: { cevap: cevapDraft.trim(), cevapTarihi: new Date().toISOString() },
+      data: { cevap: cevapDraft.trim() },
     })
-  }
+  }, [selectedId, cevapDraft, updateMesaj])
 
   if (isLoading) return <div className="h-64 bg-muted rounded-xl animate-pulse" />
 

@@ -4,7 +4,7 @@
     "gun": 1,
     "baslangic": "09:00",
     "bitis": "17:00",
-    "slotDk": 30,
+    "slotDk": 20,
     "aktif": true,
     "kapaliSlotlar": []
   },
@@ -13,7 +13,7 @@
     "gun": 2,
     "baslangic": "09:00",
     "bitis": "17:00",
-    "slotDk": 30,
+    "slotDk": 20,
     "aktif": true,
     "kapaliSlotlar": []
   },
@@ -22,7 +22,7 @@
     "gun": 3,
     "baslangic": "09:00",
     "bitis": "17:00",
-    "slotDk": 30,
+    "slotDk": 20,
     "aktif": true,
     "kapaliSlotlar": []
   },
@@ -31,7 +31,7 @@
     "gun": 4,
     "baslangic": "09:00",
     "bitis": "17:00",
-    "slotDk": 30,
+    "slotDk": 20,
     "aktif": true,
     "kapaliSlotlar": []
   },
@@ -40,7 +40,7 @@
     "gun": 5,
     "baslangic": "09:00",
     "bitis": "17:00",
-    "slotDk": 30,
+    "slotDk": 20,
     "aktif": true,
     "kapaliSlotlar": []
   }

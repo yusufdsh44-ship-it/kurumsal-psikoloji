@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
-import { readCollection, writeCollection } from "@/lib/api"
-import { nanoid } from "nanoid"
+import { supabase } from "@/lib/supabase"
 
 const mesajSchema = z.object({
   anonim: z.boolean(),
@@ -36,7 +35,6 @@ export async function POST(request: NextRequest) {
 
   const { anonim, adSoyad, mudurluk, email, kategori, mesaj } = result.data
 
-  // Kimlikli ise ad ve müdürlük zorunlu
   if (!anonim && (!adSoyad || !mudurluk)) {
     return NextResponse.json(
       { error: "Kimlikli mesajda ad soyad ve müdürlük zorunludur" },
@@ -44,24 +42,19 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  const record = {
-    id: nanoid(),
+  const { error } = await supabase.from("mesajlar").insert({
     anonim,
-    adSoyad: anonim ? null : adSoyad,
+    ad_soyad: anonim ? null : adSoyad,
     mudurluk: anonim ? null : mudurluk,
     email: email || null,
     kategori,
     mesaj,
-    okundu: false,
-    olusturmaTarihi: new Date().toISOString(),
-    cevap: null,
-    cevapTarihi: null,
+  })
+
+  if (error) {
+    console.error("[public/mesaj] Supabase insert error:", error.message)
+    return NextResponse.json({ error: "Mesaj kaydedilemedi" }, { status: 500 })
   }
 
-  // Local JSON'a kaydet
-  const data = await readCollection<Record<string, unknown>>("mesajlar")
-  data.push(record)
-  await writeCollection("mesajlar", data)
-
-  return NextResponse.json({ ok: true, id: record.id }, { status: 201 })
+  return NextResponse.json({ ok: true }, { status: 201 })
 }

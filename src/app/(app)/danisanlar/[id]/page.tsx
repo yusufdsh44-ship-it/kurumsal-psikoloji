@@ -161,6 +161,9 @@ export default function DanisanProfilePage({ params }: { params: Promise<{ id: s
             )}
             <h1 className="text-lg font-bold text-foreground leading-none tracking-tight">{d.adSoyad}</h1>
             <span className="text-[11px] font-mono text-muted-foreground/60">#{d.sicilNo}</span>
+            {d.referansKodu && (
+              <span className="text-[10px] font-mono text-primary/60 bg-primary/5 px-1.5 py-0.5 rounded">{d.referansKodu}</span>
+            )}
             {seansCount > 0 && (
               <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
                 {seansCount} seans · {avgSureDk}dk ort.

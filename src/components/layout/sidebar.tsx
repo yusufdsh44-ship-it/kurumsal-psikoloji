@@ -4,28 +4,30 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
-  LayoutDashboard, Users, ClipboardCheck, FileText, Building2,
-  Calendar, BarChart3, Clock, Search, PanelLeftClose, PanelLeft, RefreshCw, Brain, ChevronDown, MessageSquare,
+  LayoutGrid, UserRound, Activity, NotebookPen, Landmark,
+  CalendarDays, PieChart, Search, PanelLeftClose, PanelLeft, RefreshCw, Brain, ChevronDown, Mail, Clock, Compass,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useQuery } from "@tanstack/react-query"
 import { useAppStore } from "@/hooks/use-recent"
 import { useCollection, useSyncAll } from "@/hooks/use-data"
 import { getKademeStyle, formatDate } from "@/lib/triyaj"
 import type { Danisan, GorusmeNotu } from "@/types"
 
 const ICON_MAP: Record<string, React.ElementType> = {
-  LayoutDashboard, Users, ClipboardCheck, FileText, Building2, Calendar, BarChart3, Clock, MessageSquare,
+  LayoutGrid, UserRound, Activity, NotebookPen, Landmark, CalendarDays, PieChart, Mail, Compass,
 }
 
 const MENU = [
-  { href: "/", label: "Dashboard", icon: "LayoutDashboard" },
-  { href: "/danisanlar", label: "Danışanlar", icon: "Users", countKey: "danisanlar" },
-  { href: "/testler", label: "Test Sonuçları", icon: "ClipboardCheck", countKey: "testSonuclari" },
-  { href: "/planlar", label: "Seans Planları", icon: "FileText", countKey: "seansPlanlari" },
-  { href: "/mudurlukler", label: "Müdürlükler", icon: "Building2", countKey: "mudurlukler" },
-  { href: "/takvim", label: "Takvim", icon: "Calendar" },
-  { href: "/raporlar", label: "Raporlar", icon: "BarChart3" },
-  { href: "/mesajlar", label: "Mesajlar", icon: "MessageSquare", countKey: "mesajlar" },
+  { href: "/", label: "Dashboard", icon: "LayoutGrid" },
+  { href: "/danisanlar", label: "Danışanlar", icon: "UserRound", countKey: "danisanlar" },
+  { href: "/testler", label: "Test Sonuçları", icon: "Activity", countKey: "testSonuclari" },
+  { href: "/planlar", label: "Seans Planları", icon: "NotebookPen", countKey: "seansPlanlari" },
+  { href: "/mudurlukler", label: "Müdürlükler", icon: "Landmark", countKey: "mudurlukler" },
+  { href: "/takvim", label: "Takvim", icon: "CalendarDays" },
+  { href: "/raporlar", label: "Raporlar", icon: "PieChart" },
+  { href: "/mesajlar", label: "Mesajlar", icon: "Mail", countKey: "mesajlar" },
+  { href: "/kesfet", label: "Keşfet", icon: "Compass" },
 ]
 
 interface SidebarProps {
@@ -39,7 +41,15 @@ export function Sidebar({ onOpenSearch }: SidebarProps) {
   const { data: testler } = useCollection("testSonuclari")
   const { data: planlar } = useCollection("seansPlanlari")
   const { data: mudurlukler } = useCollection("mudurlukler")
-  const { data: mesajlar } = useCollection("mesajlar")
+  const { data: mesajlar } = useQuery<{ okundu: boolean }[]>({
+    queryKey: ["supabase-mesajlar-count"],
+    queryFn: async () => {
+      const res = await fetch("/api/mesajlar")
+      if (!res.ok) return []
+      return res.json()
+    },
+    refetchInterval: 30_000,
+  })
   const { data: notlarRaw } = useCollection("gorusmeNotlari")
   const sync = useSyncAll()
   const [takvimOpen, setTakvimOpen] = useState(false)
@@ -172,7 +182,7 @@ export function Sidebar({ onOpenSearch }: SidebarProps) {
               onClick={() => setTakvimOpen(p => !p)}
               className="w-full flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-stone-500 uppercase tracking-wider hover:text-stone-300 transition-colors"
             >
-              <Calendar className="w-3 h-3" />
+              <CalendarDays className="w-3 h-3" />
               <span>Seans Takvimi</span>
               <span className="text-[10px] normal-case tracking-normal font-normal text-stone-600">({timeline.length})</span>
               <ChevronDown className={cn("w-3 h-3 ml-auto transition-transform", takvimOpen && "rotate-180")} />

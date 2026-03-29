@@ -66,6 +66,7 @@ export interface Danisan {
   gorusmeYapildi: boolean
   klinikOzet: string
   notlar: string
+  referansKodu: string | null
 }
 
 export interface Mudurluk {
@@ -162,6 +163,7 @@ export interface RandevuTalebi {
   olusturmaTarihi: string
   durum: RandevuTalebiDurum
   kaynak: "online"
+  referansKodu?: string
 }
 
 export interface Musaitlik {

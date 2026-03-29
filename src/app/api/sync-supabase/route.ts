@@ -28,6 +28,7 @@ export async function GET() {
       olusturmaTarihi: r.olusturma_tarihi,
       durum: r.durum,
       kaynak: r.kaynak,
+      referansKodu: r.referans_kodu ?? undefined,
     }))
 
     // Local JSON'a yaz
@@ -35,7 +36,9 @@ export async function GET() {
 
     return NextResponse.json({ synced: talepler.length })
   } catch (e) {
-    return NextResponse.json({ error: "Sync failed" }, { status: 500 })
+    const msg = e instanceof Error ? e.message : String(e)
+    console.error("[sync-supabase] GET error:", msg)
+    return NextResponse.json({ error: "Sync failed", detail: msg }, { status: 500 })
   }
 }
 
@@ -73,8 +76,34 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ updated: true })
     }
 
+    // Tarihe ozel slot kapat
+    if (action === "close-slot" && data?.tarih && data?.saat) {
+      const { error } = await supabase.from("kapali_tarih_slotlari").upsert(
+        { tarih: data.tarih, saat: data.saat },
+        { onConflict: "tarih,saat" }
+      )
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+      return NextResponse.json({ closed: true })
+    }
+
+    // Tarihe ozel slot ac
+    if (action === "open-slot" && data?.tarih && data?.saat) {
+      const { error } = await supabase.from("kapali_tarih_slotlari").delete()
+        .eq("tarih", data.tarih).eq("saat", data.saat)
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+      return NextResponse.json({ opened: true })
+    }
+
+    // Tarihe ozel kapali slotlari getir
+    if (action === "get-closed-slots" && data?.tarih) {
+      const { data: rows } = await supabase.from("kapali_tarih_slotlari").select("saat").eq("tarih", data.tarih)
+      return NextResponse.json({ slots: (rows ?? []).map(r => r.saat) })
+    }
+
     return NextResponse.json({ error: "Unknown action" }, { status: 400 })
   } catch (e) {
-    return NextResponse.json({ error: "Failed" }, { status: 500 })
+    const msg = e instanceof Error ? e.message : String(e)
+    console.error("[sync-supabase] POST error:", msg)
+    return NextResponse.json({ error: "Failed", detail: msg }, { status: 500 })
   }
 }

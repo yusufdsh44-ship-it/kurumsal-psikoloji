@@ -344,6 +344,7 @@ export default function DanisanlarPage() {
               <DanisanTable
                 danisanlar={filtered}
                 mudurlukMap={mudurlukMap}
+                etiketMap={etiketMap}
                 sortBy={sortBy}
                 sortDir={sortDir}
                 onSort={handleSort}
@@ -362,6 +363,7 @@ export default function DanisanlarPage() {
                 <DanisanTable
                   danisanlar={acilYuksek}
                   mudurlukMap={mudurlukMap}
+                  etiketMap={etiketMap}
                   sortBy={sortBy}
                   sortDir={sortDir}
                   onSort={handleSort}
@@ -384,6 +386,7 @@ export default function DanisanlarPage() {
           <MudurlukGroupView
             grouped={groupedByMudurluk}
             mudurlukMap={mudurlukMap}
+            etiketMap={etiketMap}
             sortBy={sortBy}
             sortDir={sortDir}
             onSort={handleSort}
@@ -400,6 +403,7 @@ export default function DanisanlarPage() {
                 <DanisanTable
                   danisanlar={bekleyen}
                   mudurlukMap={mudurlukMap}
+                  etiketMap={etiketMap}
                   sortBy={sortBy}
                   sortDir={sortDir}
                   onSort={handleSort}
@@ -418,6 +422,7 @@ export default function DanisanlarPage() {
 interface TableProps {
   danisanlar: Danisan[]
   mudurlukMap: Map<string, Mudurluk>
+  etiketMap: Map<string, string[]>
   sortBy: SortKey
   sortDir: "asc" | "desc"
   onSort: (key: SortKey) => void
@@ -428,6 +433,7 @@ const PAGE_SIZE = 50
 function DanisanTable({
   danisanlar,
   mudurlukMap,
+  etiketMap,
   sortBy,
   sortDir,
   onSort,
@@ -626,6 +632,16 @@ function DanisanRow({
               <span className="font-mono">#{d.sicilNo}</span>
               {d.gorevUnvani && <span className="ml-1">· {d.gorevUnvani}</span>}
             </div>
+            {etiketler && etiketler.length > 0 && (
+              <div className="flex gap-1 flex-wrap mt-1">
+                {etiketler.slice(0, 3).map(t => (
+                  <span key={t} className="text-[9px] px-1.5 py-px rounded-full bg-amber-50 text-amber-700 font-medium leading-tight">{t}</span>
+                ))}
+                {etiketler.length > 3 && (
+                  <span className="text-[9px] text-muted-foreground/50">+{etiketler.length - 3}</span>
+                )}
+              </div>
+            )}
           </div>
         </Link>
       </td>
@@ -844,12 +860,14 @@ function KanbanCard({
 function MudurlukGroupView({
   grouped,
   mudurlukMap,
+  etiketMap,
   sortBy,
   sortDir,
   onSort,
 }: {
   grouped: Map<string, Danisan[]>
   mudurlukMap: Map<string, Mudurluk>
+  etiketMap: Map<string, string[]>
   sortBy: SortKey
   sortDir: "asc" | "desc"
   onSort: (key: SortKey) => void
@@ -884,6 +902,7 @@ function MudurlukGroupView({
               <DanisanTable
                 danisanlar={danisanlar}
                 mudurlukMap={mudurlukMap}
+                etiketMap={etiketMap}
                 sortBy={sortBy}
                 sortDir={sortDir}
                 onSort={onSort}
