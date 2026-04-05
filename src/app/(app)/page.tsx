@@ -2,7 +2,7 @@
 
 import { useCollection } from "@/hooks/use-data"
 import { useMudurlukMap } from "@/hooks/use-danisanlar"
-import { getKademeStyle, getBfiKademeStyle, formatDate } from "@/lib/triyaj"
+import { getKademeStyle, getBfiKademeStyle, formatDate, getInitials } from "@/lib/triyaj"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Users, AlertTriangle, Calendar, Clock, ClipboardCheck, Building2, UserX } from "lucide-react"
 import Link from "next/link"
@@ -263,7 +263,7 @@ function DanisanRow({ danisan: d, mudurlukAdi }: { danisan: Danisan; mudurlukAdi
         <Link href={`/danisanlar/${d.id}`} className="flex items-center gap-2.5 group">
           <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
             style={{ background: kademeStyle.text }}>
-            {d.adSoyad.split(" ").map(p => p[0]).join("").slice(0, 2)}
+            {getInitials(d.adSoyad)}
           </div>
           <div>
             <div className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">{d.adSoyad}</div>

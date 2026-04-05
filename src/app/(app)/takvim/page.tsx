@@ -8,7 +8,7 @@ import {
 import { tr } from "date-fns/locale"
 import { useCollection, useUpdateRecord } from "@/hooks/use-data"
 import { useMudurlukMap } from "@/hooks/use-danisanlar"
-import { getKademeStyle } from "@/lib/triyaj"
+import { getKademeStyle, getInitials } from "@/lib/triyaj"
 import { Breadcrumb } from "@/components/layout/breadcrumb"
 import { RandevuDialog } from "@/components/danisan/randevu-dialog"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -82,9 +82,6 @@ export default function TakvimPage() {
     }
     return map
   }, [talepler])
-
-  // İnisyaller
-  const getInitials = (name: string) => name.split(" ").map(p => p[0]).join("").slice(0, 2).toUpperCase()
 
   const handleCancelAppointment = (d: Danisan) => {
     if (!confirm(`${d.adSoyad} randevusu iptal edilsin mi?`)) return

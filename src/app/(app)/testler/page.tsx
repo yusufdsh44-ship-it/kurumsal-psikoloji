@@ -1,8 +1,8 @@
 "use client"
 
-import { useMemo, useState, useEffect } from "react"
+import { useMemo, useState, useEffect, useCallback } from "react"
 import { useCollection } from "@/hooks/use-data"
-import { getKademeStyle, getBfiKademeStyle, formatDate } from "@/lib/triyaj"
+import { getKademeStyle, getBfiKademeStyle, formatDate, getInitials } from "@/lib/triyaj"
 import { Breadcrumb } from "@/components/layout/breadcrumb"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -56,10 +56,10 @@ export default function TestlerPage() {
       .finally(() => setLoadingOnline(false))
   }
 
-  const findDanisan = (adSoyad: string): Danisan | null => {
+  const findDanisan = useCallback((adSoyad: string): Danisan | null => {
     if (!danisanlar) return null
     return danisanlar.find(d => d.adSoyad.toLowerCase() === adSoyad.toLowerCase()) ?? null
-  }
+  }, [danisanlar])
 
   // İki kaynağı birleştir
   const merged = useMemo(() => {
@@ -188,14 +188,14 @@ export default function TestlerPage() {
                             <Link href={`/danisanlar/${row.danisan.id}`} className="flex items-center gap-2.5 group">
                               <div className="w-7 h-7 rounded-md flex items-center justify-center text-[10px] font-bold text-white shrink-0"
                                 style={{ background: ks!.text }}>
-                                {row.adSoyad.split(" ").map(p => p[0]).join("").slice(0, 2)}
+                                {getInitials(row.adSoyad)}
                               </div>
                               <span className="text-sm font-medium group-hover:text-primary transition-colors">{row.adSoyad}</span>
                             </Link>
                           ) : (
                             <div className="flex items-center gap-2.5">
                               <div className="w-7 h-7 rounded-md bg-muted flex items-center justify-center text-[10px] font-bold text-muted-foreground shrink-0">
-                                {row.adSoyad.split(" ").map(p => p[0]).join("").slice(0, 2)}
+                                {getInitials(row.adSoyad)}
                               </div>
                               <span className="text-sm font-medium">{row.adSoyad}</span>
                             </div>

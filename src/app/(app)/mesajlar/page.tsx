@@ -8,7 +8,6 @@ import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import {
   MessageSquare, EyeOff, User, Mail, Send, Check, Clock,
-  AlertTriangle, Filter, ChevronDown, ChevronUp,
 } from "lucide-react"
 import type { Mesaj } from "@/types"
 

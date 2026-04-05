@@ -78,7 +78,7 @@ export function useAudioRecorder(danisanId: string, danisanAd: string, sessionDa
         insight: data.insight || prev.insight,
       }))
     } catch { /* ignore */ }
-  }, [danisanId, sessionDate])
+  }, [fileBase])
 
   // Poll on mount for existing data
   useEffect(() => { pollTranscript() }, [pollTranscript])
@@ -234,7 +234,7 @@ export function useAudioRecorder(danisanId: string, danisanAd: string, sessionDa
     } catch { /* ignore */ }
     await clearActiveSession()
     setState({ status: "idle", transcript: "", insight: "", error: null, chunkCount: 0 })
-  }, [danisanId, sessionDate, clearActiveSession])
+  }, [fileBase, clearActiveSession])
 
   // Cleanup
   useEffect(() => {

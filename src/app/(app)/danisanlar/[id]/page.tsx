@@ -11,7 +11,7 @@ import { useDanisanWithRelations } from "@/hooks/use-danisanlar"
 import { useUpdateRecord } from "@/hooks/use-data"
 import { useAppStore } from "@/hooks/use-recent"
 import { getKademeStyle, getBfiKademeStyle, getDurumStyle, getInitials, formatDate, formatDateTime } from "@/lib/triyaj"
-import { BELEDIYE_ORTALAMALARI, METRIK_INFO } from "@/lib/constants"
+import { BELEDIYE_ORTALAMALARI, METRIK_INFO, DURUM_OPTIONS } from "@/lib/constants"
 import { Breadcrumb } from "@/components/layout/breadcrumb"
 import { GorusmeForm, type GorusmeFormHandle } from "@/components/danisan/gorusme-form"
 import { SearchableTranscript } from "@/components/danisan/searchable-transcript"
@@ -25,7 +25,6 @@ import {
 } from "lucide-react"
 import type { TestSonucu, GenelDurum } from "@/types"
 
-const DURUM_OPTIONS: GenelDurum[] = ["Henüz Görülmedi", "Süreçte", "Tamamlandı", "Takipte"]
 
 const ALL_SECTION_IDS = ["klinik-ozet", "testler", "seans-plani", "anket", "gorusmeler"] as const
 type SectionId = (typeof ALL_SECTION_IDS)[number]

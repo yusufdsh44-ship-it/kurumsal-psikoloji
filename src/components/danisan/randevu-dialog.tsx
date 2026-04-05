@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react"
 import { useCollection, useUpdateRecord } from "@/hooks/use-data"
 import { useMudurlukMap } from "@/hooks/use-danisanlar"
-import { getKademeStyle } from "@/lib/triyaj"
+import { getKademeStyle, getInitials } from "@/lib/triyaj"
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog"
@@ -173,7 +173,7 @@ export function RandevuDialog({
                 <div className="flex items-center gap-2 rounded-lg border border-border px-3 py-2">
                   <div className="w-6 h-6 rounded flex items-center justify-center text-[10px] font-bold text-white"
                     style={{ background: getKademeStyle(selectedDanisan.triyajKademesi).text }}>
-                    {selectedDanisan.adSoyad.split(" ").map(p => p[0]).join("").slice(0, 2)}
+                    {getInitials(selectedDanisan.adSoyad)}
                   </div>
                   <span className="text-sm font-medium flex-1">{selectedDanisan.adSoyad}</span>
                   <button onClick={() => { setSelectedDanisanId(""); setSearch("") }}
@@ -198,7 +198,7 @@ export function RandevuDialog({
                           >
                             <div className="w-5 h-5 rounded flex items-center justify-center text-[9px] font-bold text-white shrink-0"
                               style={{ background: ks.text }}>
-                              {d.adSoyad.split(" ").map(p => p[0]).join("").slice(0, 2)}
+                              {getInitials(d.adSoyad)}
                             </div>
                             <div className="flex-1 min-w-0">
                               <span className="text-sm">{d.adSoyad}</span>

@@ -1,4 +1,4 @@
-import type { AnaTema, KurumsalTema } from "@/types"
+import type { AnaTema, KurumsalTema, GenelDurum } from "@/types"
 
 // Belediye ortalamaları (anket sonuçları)
 export const BELEDIYE_ORTALAMALARI = {
@@ -40,6 +40,14 @@ export const DURUM_RENK: Record<string, { text: string; bg: string }> = {
   "Tamamlandı": { text: "#16A34A", bg: "#F0FDF4" },
   "Takipte": { text: "#CA8A04", bg: "#FEFCE8" },
 }
+
+// Genel durum seçenekleri
+export const DURUM_OPTIONS: GenelDurum[] = [
+  "Henüz Görülmedi",
+  "Süreçte",
+  "Tamamlandı",
+  "Takipte",
+] as const
 
 // Ana tema seçenekleri
 export const ANA_TEMALAR: AnaTema[] = [

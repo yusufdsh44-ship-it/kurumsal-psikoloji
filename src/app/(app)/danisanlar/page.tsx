@@ -1,10 +1,10 @@
 "use client"
 
-import { useState, useMemo, useCallback } from "react"
+import { useState, useMemo, useCallback, useEffect } from "react"
 import { useCollection } from "@/hooks/use-data"
 import { useMudurlukMap, useFilteredDanisanlar } from "@/hooks/use-danisanlar"
 import { getKademeStyle, getBfiKademeStyle, getDurumStyle, getInitials, formatDate } from "@/lib/triyaj"
-import { KADEME_RENK, BFI_KADEME_RENK, BELEDIYE_ORTALAMALARI } from "@/lib/constants"
+import { KADEME_RENK, BFI_KADEME_RENK, BELEDIYE_ORTALAMALARI, DURUM_OPTIONS } from "@/lib/constants"
 import { Breadcrumb } from "@/components/layout/breadcrumb"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -33,12 +33,6 @@ type SortKey =
 
 const KSE_KADEME_OPTIONS = ["1", "2", "3", "4", "5"] as const
 const BFI_KADEME_OPTIONS = ["A", "B", "C"] as const
-const DURUM_OPTIONS = [
-  "Henüz Görülmedi",
-  "Süreçte",
-  "Tamamlandı",
-  "Takipte",
-] as const
 
 export default function DanisanlarPage() {
   const [search, setSearch] = useState("")
@@ -443,7 +437,7 @@ function DanisanTable({
   const paged = danisanlar.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
 
   // Filtre/sıralama değişince ilk sayfaya dön
-  useMemo(() => setPage(0), [danisanlar])
+  useEffect(() => { setPage(0) }, [danisanlar])
 
   if (danisanlar.length === 0) {
     return <EmptyState message="Filtrelere uyan danışan bulunamadı." />
